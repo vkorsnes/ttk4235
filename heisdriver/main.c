@@ -2,7 +2,18 @@
 #include <time.h>
 #include "elev.h"
 
+typedef enum {
+    STATE_MOVING_DOWN,
+    STATE_MOVING_UP,
+    STATE_STOPPED
+} states;
 
+typedef enum {
+    STOP,
+    DIR_DOWN,
+    DIR_UP,
+    DOORS
+} action;
 
 void omvk_initialize()
 {
@@ -47,8 +58,27 @@ int main() {
     elev_set_door_open_lamp(0);
     omvk_doors();
     currentFloor = elev_get_floor_sensor_signal();
+    elev_set_motor_direction(DIRN_DOWN);
 
     while (1) {
+        if (elev_get_floor_sensor_signal() == 0) {
+            elev_set_motor_direction(DIRN_STOP);
+            elev_set_floor_indicator(elev_get_floor_sensor_signal());
+            omvk_doors();
+            elev_set_motor_direction(DIRN_UP);
+            omvk_delay(1);
+        }
+        else if (elev_get_floor_sensor_signal() == 3) {
+            elev_set_motor_direction(DIRN_STOP);
+            elev_set_floor_indicator(elev_get_floor_sensor_signal());
+            omvk_doors();
+            elev_set_motor_direction(DIRN_DOWN);
+            omvk_delay(1);
+        }
+        else if (elev_get_floor_sensor_signal() != -1) {
+            elev_set_floor_indicator(elev_get_floor_sensor_signal());
+        }
+
         // Stop elevator and exit program if the stop button is pressed
         if (elev_get_stop_signal() == 1) {
             elev_set_motor_direction(DIRN_STOP);
