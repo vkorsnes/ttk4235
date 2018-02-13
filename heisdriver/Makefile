@@ -11,7 +11,7 @@ LDFLAGS = -lcomedi -lm
 ELEVSRC = elev.c io.c main.c
 
 # program executable file name.
-TARGET = heis
+TARGET = heis.out
 
 # top-level rule, to compile everything.
 all: $(TARGET)
