@@ -1,5 +1,5 @@
 # Which compiler to use
-CC = clang-3.8
+CC = gcc 
 
 # Compiler flags go here.
 CFLAGS = -g -Wall
