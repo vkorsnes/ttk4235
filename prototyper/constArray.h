@@ -2,17 +2,12 @@
 #ifndef _EVENT_LIST_H
 #define _EVENT_LIST_H
 
-struct listStruct{
-	int *arr;
-	int len = 0;
-};
+int arr[16];
 
-bool checkDuplicate(listStruct *list, int order) {
-	if (list->len == 0) return false;
-	else
-		for(int i = 0; i < list->len; ++i)
-			if (list->arr[i] == order) return true;
-		return false;
+bool checkDuplicate(listStruct list[], int order) {
+	for(int i = 0; i < 16; ++i)
+		if (list[i] == order) return true;
+	return false;
 }
 
 void removeOrder(listStruct *list, int floor) {
