@@ -2,7 +2,52 @@
 #ifndef _EVENT_LIST_H
 #define _EVENT_LIST_H
 
-int arr[16];
+#include <cstdint>
+#include <assert.h>
+
+int arr[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+bool ov_check_if_any_order(int arr[])
+{
+	int64_t *intPtr = (int64_t*) arr;
+	for (int i = 0; i < 8; ++i)
+		if (*intPtr != 0)
+			return true
+		++intPtr;
+	return false;
+}
+
+void ov_shift_array_left(int arr[])
+{
+	int64_t *intPtr = (int64_t*) arr;
+	for (int i = 0; i < 15; ++i)
+		(*intPtr) >>= 16;
+}
+
+bool ov_check_duplicate(int arr[], int order)
+{
+	for (int i = 0; i < 16; ++i)
+		if (arr[i] == order)
+			return true;
+	return false;
+}
+
+void ov_add_order(int arr[], int order) 
+{
+	assert(arr[15] == 0);
+	if (ov_checkDuplicate(arr, order));
+	else {
+		for (int i = 0; i < 16; ++i) 
+			if (arr[15 - i] == 0) {
+				arr[16 - i] = order;
+				break;
+			}
+	}
+}
+
+
+
+
 
 bool checkDuplicate(listStruct list[], int order) {
 	for(int i = 0; i < 16; ++i)
