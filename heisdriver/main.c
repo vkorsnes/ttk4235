@@ -18,9 +18,10 @@ void ov_delay(int s);
 void ov_doors();
 int ov_check_if_any_orders();
 int ov_get_order(int currentFloor);
-int ov_check_if_pickups(int currentDir, int currentFloor, int currentOrder);
+int ov_check_if_pickups(int currentDir, int currentFloor);
 int ov_check_if_order_above(int currentFloor);
 int ov_check_if_order_below(int currentFloor);
+void ov_turn_off_lights(int currentFloor);
 
 int main() {
     // Initialize hardware
@@ -32,22 +33,59 @@ int main() {
     int currentFloor = -1;
     int currentOrder = 0;
     int currentDir = 0;
+    int stopped = 0;
 
     ov_initialize();
     elev_set_door_open_lamp(0);
-    ov_doors();
     currentFloor = elev_get_floor_sensor_signal();
+    elev_set_floor_indicator(currentFloor);
     currentOrder = currentFloor;
+
     while (1) {
         ov_floor_buttons();
-        ov_finish_order(currentFloor, currentDir);
+        //ov_finish_order(currentFloor, currentDir);
+        printf("currentOrder: %d \t currenDir: %d \t currentFloor: %d \n", currentOrder, currentDir, currentFloor);
+        ov_print_matrix();
         if (elev_get_stop_signal() == 1) {
             elev_set_motor_direction(DIRN_STOP);
-            currentDir = 0;
-            break;
+            if (elev_get_floor_sensor_signal() != -1)
+                elev_set_door_open_lamp(1);
+
+            elev_set_stop_lamp(1);
+            stopped = 1;
+
+            for (int i = 0; i < 4; ++i) {
+                ov_turn_off_lights(i);
+                for (int j = 0; j < 3; ++j)
+                    order_matrix[i][j] = 0;
+            }
+
+            while (stopped) {
+                printf("STOPPED!!!!!\n");
+                ov_floor_buttons();
+                if (ov_check_if_any_orders()) stopped = 0;
+            }
+
+            elev_set_stop_lamp(0);
+            elev_set_door_open_lamp(0);
+            currentOrder = ov_get_order(-1);
+
+            if (currentOrder == currentFloor) {
+                if (currentDir == 1) {
+                    currentDir = -1;
+                    currentFloor += 1;
+                }
+                else if (currentDir == -1) {
+                    currentDir = 1;
+                    currentFloor -= 1;
+                }
+            }
+            else currentDir = 0;
+
+            // if (currentFloor == currentOrder) currentFloor+=currentDir;
         }
 
-        if (ov_check_if_any_orders()) {
+        if (ov_check_if_any_orders() && (currentDir == 0)) {
             currentOrder = ov_get_order(currentFloor);
             if (currentFloor - currentOrder < 0) {
                 elev_set_motor_direction(DIRN_UP);
@@ -60,20 +98,54 @@ int main() {
                     currentDir = -1;
             }
         }
-        while(currentFloor != currentOrder) {
+
+        if (currentDir != 0) {
             ov_floor_buttons();
-            currentFloor = elev_get_floor_sensor_signal();
-            currentOrder = ov_check_if_pickups(currentDir, currentFloor, currentOrder);
+            
+            if (elev_get_floor_sensor_signal() != -1) {
+                currentFloor = elev_get_floor_sensor_signal();
+                elev_set_floor_indicator(currentFloor);
+                printf("CHECKING FOR PICKUPS!\n");
+                if (ov_check_if_pickups(currentDir, currentFloor)) {
+                    elev_set_motor_direction(DIRN_STOP);
+                    ov_finish_order(currentFloor, currentDir);
+                    ov_doors();
+                }
+            }
+
+            if (currentDir == 1) {
+                elev_set_motor_direction(DIRN_UP);
+                if (elev_get_floor_sensor_signal() == -1);
+                else if (!ov_check_if_order_above(currentFloor))
+                    currentDir = 0;
+            }
+            else if (currentDir == -1) {
+                elev_set_motor_direction(DIRN_DOWN);
+                if (elev_get_floor_sensor_signal() == -1);
+                else if (!ov_check_if_order_below(currentFloor))
+                    currentDir = 0;
+            }
+            //currentFloor = elev_get_floor_sensor_signal();
+            
+            
             printf("currentOrder: %d \t currenDir: %d \t currentFloor: %d \n", currentOrder, currentDir, currentFloor);
             ov_print_matrix();
-            if (currentOrder == currentFloor) {
+            if (currentDir == 0) { //currentOrder == currentFloor) {
                 elev_set_motor_direction(DIRN_STOP);
                 ov_finish_order(currentFloor, currentDir);
                 ov_doors();
-                currentDir = 0;
             }
         }
 
+        if ((currentFloor == currentOrder) && (elev_get_floor_sensor_signal() != -1)){ //&& !ov_check_if_any_orders()) {
+            for (int i = 0; i < 3; ++i) {
+                order_matrix[currentFloor][i] = 0;
+            }
+            ov_turn_off_lights(currentFloor);
+            printf("LST FNC!!!!!\n");
+            printf("currentOrder: %d \t currenDir: %d \t currentFloor: %d \n", currentOrder, currentDir, currentFloor);
+            ov_print_matrix();
+        }
     }
     return 0;
 }
@@ -89,10 +161,6 @@ void ov_initialize()
         if (elev_get_floor_sensor_signal() !=  -1) {
             elev_set_motor_direction(DIRN_STOP);
             elev_set_floor_indicator(elev_get_floor_sensor_signal());
-            break;
-        }
-                if (elev_get_stop_signal() == 1) {
-            elev_set_motor_direction(DIRN_STOP);
             break;
         }
     }
@@ -153,7 +221,7 @@ void ov_delay(int s)
 void ov_doors()
 {
     elev_set_door_open_lamp(1);
-    ov_delay(1);
+    ov_delay(2);
     elev_set_door_open_lamp(0);
 }
 
@@ -167,7 +235,7 @@ int ov_check_if_any_orders()
 
 int ov_check_if_order_above(int currentFloor)
 {
-    for (int i = currentFloor; i < 4; ++i)
+    for (int i = currentFloor + 1; i < 4; ++i)
         for (int j = 0; j < 3; ++j)
             if (order_matrix[i][j] != 0) return 1;
     return 0;
@@ -175,7 +243,7 @@ int ov_check_if_order_above(int currentFloor)
 
 int ov_check_if_order_below(int currentFloor)
 {
-    for (int i = currentFloor; i > -1; --i)
+    for (int i = currentFloor - 1; i > -1; --i)
         for (int j = 0; j < 3; ++j)
             if (order_matrix[i][j] != 0) return 1;
     return 0;
@@ -188,8 +256,21 @@ int ov_get_order(int currentFloor)
             if(order_matrix[i][j] && i != currentFloor) return i;
 }
 
-int ov_check_if_pickups(int currentDir, int currentFloor, int currentOrder)
+int ov_check_if_pickups(int currentDir, int currentFloor)
 {
+    if (currentDir == 1) {
+        for (int i = 0; i < 2; ++i) {
+            if (order_matrix[currentFloor][i]) return 1;
+        }
+    }
+    else if (currentDir == -1) {
+        for (int i = 1; i < 3; ++i) {
+            if (order_matrix[currentFloor][i]) return 1;
+        }
+    }
+    else return 0;
+
+/*
     if (currentDir == 1) {
         for (int i = currentFloor; i < 4; ++i) {
             if (order_matrix[i][0]) return i;
@@ -203,6 +284,7 @@ int ov_check_if_pickups(int currentDir, int currentFloor, int currentOrder)
         }
     }
     return 0;
+*/
 }
 
 void ov_finish_order(int currentFloor, int currentDir)
@@ -276,6 +358,18 @@ void ov_print_matrix()
 {
     for (int i = 0; i < 4; ++i) {
         printf("{%d} {%d} {%d}\n", order_matrix[3 - i][0], order_matrix[3 - i][1], order_matrix[3 - i][2] );
+    }
+}
+
+void ov_turn_off_lights(int currentFloor) {
+    elev_set_button_lamp(buttons[1], currentFloor, 0);
+    if (currentFloor == 0)
+        elev_set_button_lamp(buttons[0], currentFloor, 0);
+    else if (currentFloor == 3)
+        elev_set_button_lamp(buttons[2], currentFloor, 0);
+    else {
+        elev_set_button_lamp(buttons[0], currentFloor, 0);
+        elev_set_button_lamp(buttons[2], currentFloor, 0);
     }
 }
 
