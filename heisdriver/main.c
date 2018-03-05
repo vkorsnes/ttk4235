@@ -19,19 +19,20 @@ int main() {
     int stopped = 0;
 
     initialize();
-    elev_set_door_open_lamp(0);
+    
     currentFloor = elev_get_floor_sensor_signal();
     elev_set_floor_indicator(currentFloor);
     currentOrder = currentFloor;
 
     while (1) {
-        floor_buttons();
-        //finish_order(currentFloor, currentDir);
+        check_buttons_for_input();
         printf("currentOrder: %d \t currenDir: %d \t currentFloor: %d \n", currentOrder, currentDir, currentFloor);
         print_matrix();
         if (elev_get_stop_signal() == 1) 
             stop(stopped, currentOrder, currentDir);
 
+
+        // The case when elevator is not moving
         if (check_if_any_orders() && (currentDir == 0)) {
             currentOrder = get_order(currentFloor);
             if (currentFloor - currentOrder < 0) {
@@ -46,9 +47,9 @@ int main() {
             }
         }
 
+        // The case when elevator is moving
         if (currentDir != 0) {
-            floor_buttons();
-            
+            check_buttons_for_input();
             if (elev_get_floor_sensor_signal() != -1) {
                 currentFloor = elev_get_floor_sensor_signal();
                 elev_set_floor_indicator(currentFloor);
@@ -82,7 +83,7 @@ int main() {
             }
         }
 
-        if ((currentFloor == currentOrder) && (elev_get_floor_sensor_signal() != -1)){ //&& !check_if_any_orders()) {
+        if ((currentFloor == currentOrder) && (elev_get_floor_sensor_signal() != -1)) {
             for (int i = 0; i < 3; ++i) {
                 order_matrix[currentFloor][i] = 0;
             }

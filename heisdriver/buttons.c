@@ -1,6 +1,6 @@
 #include "buttons.h"
 
-void floor_buttons()
+void check_buttons_for_input()
 {
     for (int i = 0; i < 4; ++i) {
         switch (i) {

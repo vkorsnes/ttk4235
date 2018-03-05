@@ -20,6 +20,10 @@ int get_order(int currentFloor);
 // When moving, checks if it should stop and pick up passanger.
 int check_if_pickups(int currentDir, int currentFloor);
 
+// 
+void finish_order(int currentFloor, int currentDir)
+
+
 // Functions for making sure the elevator reaches the first and fourth floor.
 int check_if_order_above(int currentFloor);
 int check_if_order_below(int currentFloor);
