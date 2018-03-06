@@ -1,10 +1,11 @@
 #include <stdio.h>
-
 #include "elev.h"
 #include "order_system.h"
 #include "elevator_controller.h"
 #include "buttons.h"
+#include "doors.h"
 
+void print_matrix();
 
 int main() {
     // Initialize hardware
@@ -16,7 +17,6 @@ int main() {
     int currentFloor = -1;
     int currentOrder = 0;
     int currentDir = 0;
-    int stopped = 0;
 
     initialize();
     
@@ -29,7 +29,7 @@ int main() {
         printf("currentOrder: %d \t currenDir: %d \t currentFloor: %d \n", currentOrder, currentDir, currentFloor);
         print_matrix();
         if (elev_get_stop_signal() == 1) 
-            stop(stopped, currentOrder, currentDir);
+            stop(currentFloor, currentOrder, currentDir);
 
 
         // The case when elevator is not moving
@@ -55,6 +55,7 @@ int main() {
                 elev_set_floor_indicator(currentFloor);
                 printf("CHECKING FOR PICKUPS!\n");
                 if (check_if_pickups(currentDir, currentFloor)) {
+                    printf("Found pickup\n");
                     elev_set_motor_direction(DIRN_STOP);
                     finish_order(currentFloor, currentDir);
                     doors();
@@ -85,7 +86,7 @@ int main() {
 
         if ((currentFloor == currentOrder) && (elev_get_floor_sensor_signal() != -1)) {
             for (int i = 0; i < 3; ++i) {
-                order_matrix[currentFloor][i] = 0;
+                rset_order(currentFloor, i);
             }
             turn_off_lights(currentFloor);
             printf("LST FNC!!!!!\n");

@@ -1,5 +1,5 @@
 # Which compiler to use
-CC = gcc 
+CC = clang-3.8 
 
 # Compiler flags go here.
 CFLAGS = -g -Wall
@@ -8,13 +8,13 @@ CFLAGS = -g -Wall
 LDFLAGS = -lcomedi -lm
 
 # list of sources
-ELEVSRC = elev.c io.c main.c
+ELEVSRC = elev.c io.c main.c buttons.c doors.c elevator_controller.c order_system.c
 
 # program executable file name.
 TARGET = heis.out
 
 # top-level rule, to compile everything.
-all: $(TARGET)
+all: clean $(TARGET)
 
 # Define all object files.
 ELEVOBJ = $(ELEVSRC:.c=.o)

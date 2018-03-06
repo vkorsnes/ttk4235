@@ -1,4 +1,7 @@
 #include "elevator_controller.h"
+#include "order_system.h"
+#include "elev.h"
+#include "buttons.h"
 
 void initialize()
 {
@@ -16,25 +19,24 @@ void initialize()
     }
 }
 
-void stop(int stopped, int currentOrder, int currentDir) 
+void stop(int currentFloor, int currentOrder, int currentDir) 
 {
     elev_set_motor_direction(DIRN_STOP);
     if (elev_get_floor_sensor_signal() != -1)
         elev_set_door_open_lamp(1);
 
     elev_set_stop_lamp(1);
-    stopped = 1;
 
     for (int i = 0; i < 4; ++i) {
         turn_off_lights(i);
         for (int j = 0; j < 3; ++j)
-            order_matrix[i][j] = 0;
+            rset_order(i,j);
     }
 
-    while (stopped) {
+    while (1) {
         printf("STOPPED!!!!!\n");
-        floor_buttons();
-        if (check_if_any_orders()) stopped = 0;
+        check_buttons_for_input();
+        if (check_if_any_orders()) break;
     }
 
     elev_set_stop_lamp(0);

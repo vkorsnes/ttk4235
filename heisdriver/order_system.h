@@ -1,15 +1,10 @@
 #ifndef _ORDER_SYSTEM_H
 #define _ORDER_SYSTEM_H
 
-int order_matrix[4][3] = 
-{
-    { 0, 0, 0 }, // first   up, elevator, down 
-    { 0, 0, 0 }, // second  up, elevator, down 
-    { 0, 0, 0 }, // third   up, elevator, down 
-    { 0, 0, 0 }  // fourth  up, elevator, down 
-};
+#include "elev.h"
 
-elev_button_type_t button_type[3] = { BUTTON_CALL_UP, BUTTON_COMMAND, BUTTON_CALL_DOWN };
+extern int order_matrix[4][3];
+extern elev_button_type_t button_type[3];
 
 // If any orders, returns true (1)
 int check_if_any_orders();
@@ -21,8 +16,10 @@ int get_order(int currentFloor);
 int check_if_pickups(int currentDir, int currentFloor);
 
 // 
-void finish_order(int currentFloor, int currentDir)
+void finish_order(int currentFloor, int currentDir);
 
+void set_order(int m, int n);
+void rset_order(int m, int n);
 
 // Functions for making sure the elevator reaches the first and fourth floor.
 int check_if_order_above(int currentFloor);

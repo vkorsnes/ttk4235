@@ -1,4 +1,6 @@
 #include "buttons.h"
+#include "order_system.h"
+
 
 void check_buttons_for_input()
 {
@@ -9,7 +11,7 @@ void check_buttons_for_input()
                     if (elev_get_button_signal(button_type[j], i)) {
                         elev_set_button_lamp(button_type[j], i, 1);
                         
-                    order_matrix[i][j] = 1;
+                    set_order(i,j);
                     }
 
                 }
@@ -19,7 +21,7 @@ void check_buttons_for_input()
                     if (elev_get_button_signal(button_type[j], i)) {
                         elev_set_button_lamp(button_type[j], i, 1);
                         
-                    order_matrix[i][j] = 1;
+                    set_order(i,j);
                     }
                 }
             } break;
@@ -28,7 +30,7 @@ void check_buttons_for_input()
                     if (elev_get_button_signal(button_type[j], i)) {
                         elev_set_button_lamp(button_type[j], i, 1);
                         
-                    order_matrix[i][j] = 1;
+                    set_order(i,j);
                     }
                 }
             } break;
@@ -37,7 +39,7 @@ void check_buttons_for_input()
                     if (elev_get_button_signal(button_type[j], i)) {
                         elev_set_button_lamp(button_type[j], i, 1);
                         
-                    order_matrix[i][j] = 1;
+                    set_order(i,j);
                     }
                 }
             } break;
