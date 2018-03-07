@@ -18,7 +18,7 @@ void initialize()
     }
 }
 
-void emergency_stop(int currentFloor, int currentOrder, int currentDir) 
+void emergency_stop(int current_floor, int current_order, int current_dir) 
 {
     elev_set_motor_direction(DIRN_STOP);
 
@@ -46,19 +46,19 @@ void emergency_stop(int currentFloor, int currentOrder, int currentDir)
 
     elev_set_stop_lamp(0);
     elev_set_door_open_lamp(0);
-    currentOrder = get_order(-1);
+    current_order = get_order(-1);
 
     // When stopping between two floors, in order to return we must
     // change current floor to make it move back to a floor.
-    if (currentOrder == currentFloor) {
-        if (currentDir == 1) {
-            currentDir = -1;
-            currentFloor += 1;
+    if (current_order == current_floor) {
+        if (current_dir == 1) {
+            current_dir = -1;
+            current_floor += 1;
         }
-        else if (currentDir == -1) {
-            currentDir = 1;
-            currentFloor -= 1;
+        else if (current_dir == -1) {
+            current_dir = 1;
+            current_floor -= 1;
         }
     }
-    else currentDir = 0;
+    else current_dir = 0;
 }
