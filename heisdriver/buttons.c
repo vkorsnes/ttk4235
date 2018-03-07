@@ -38,18 +38,3 @@ void check_buttons_for_input()
         }
     }
 }
-
-void turn_off_lights(int currentFloor) {
-    elev_set_button_lamp(button_type[1], currentFloor, 0);
-   
-    if (currentFloor == 0)
-        elev_set_button_lamp(button_type[0], currentFloor, 0);
-    
-    else if (currentFloor == 3)
-        elev_set_button_lamp(button_type[2], currentFloor, 0);
-    
-    else {
-        elev_set_button_lamp(button_type[0], currentFloor, 0);
-        elev_set_button_lamp(button_type[2], currentFloor, 0);
-    }
-}

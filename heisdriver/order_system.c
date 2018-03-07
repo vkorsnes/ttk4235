@@ -71,7 +71,7 @@ void finish_order(int currentFloor, int currentDir)
     else if (currentDir == -1) 
         rset_order(currentFloor, 2);
     
-    // In this case the elevator has landed on this floor, and thus all orders are removed
+    // curentDir == 0 elevator has landed on this floor, and thus all orders are removed
     else {
         rset_order(currentFloor, 0);
         rset_order(currentFloor, 2);

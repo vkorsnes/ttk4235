@@ -95,7 +95,6 @@ int main()
             for (int i = 0; i < 3; ++i) {
                 rset_order(currentFloor, i);
             }
-            turn_off_lights(currentFloor);
             doors();
         }
     }
