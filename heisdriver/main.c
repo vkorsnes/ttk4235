@@ -5,9 +5,8 @@
 #include "buttons.h"
 #include "doors.h"
 
-void print_matrix();
-
-int main() {
+int main() 
+{
     // Initialize hardware
     if (!elev_init()) {
         printf("Unable to initialize elevator hardware!\n");
@@ -16,52 +15,60 @@ int main() {
 
     int currentFloor = -1;
     int currentOrder = 0;
+
+    // currentDir is used for making sure the end floors are serviced,
+    // only changes when there is no more orders above/below.
     int currentDir = 0;
 
     initialize();
     
     currentFloor = elev_get_floor_sensor_signal();
-    elev_set_floor_indicator(currentFloor);
     currentOrder = currentFloor;
-
+    
     while (1) {
         check_buttons_for_input();
-        printf("currentOrder: %d \t currenDir: %d \t currentFloor: %d \n", currentOrder, currentDir, currentFloor);
-        print_matrix();
+
         if (elev_get_stop_signal() == 1) 
-            stop(currentFloor, currentOrder, currentDir);
+            // Stays inside stop untill new order
+            emergency_stop(currentFloor, currentOrder, currentDir);
 
 
         // The case when elevator is not moving
         if (check_if_any_orders() && (currentDir == 0)) {
             currentOrder = get_order(currentFloor);
-            if (currentFloor - currentOrder < 0) {
+
+            // checks which direction it should move
+            if (currentFloor - currentOrder < 0) { 
                 elev_set_motor_direction(DIRN_UP);
-                if (!check_if_order_below(currentFloor))
-                    currentDir = 1;
+                currentDir = 1;
             }
             else if (currentFloor - currentOrder > 0) {
                 elev_set_motor_direction(DIRN_DOWN);
-                if (!check_if_order_above(currentFloor))
-                    currentDir = -1;
+                currentDir = -1;
             }
         }
 
         // The case when elevator is moving
         if (currentDir != 0) {
-            check_buttons_for_input();
+
+            // Checks if it should stop when moving past a floor,
+            // but only when on on floor
             if (elev_get_floor_sensor_signal() != -1) {
                 currentFloor = elev_get_floor_sensor_signal();
+
+                // Sets indicator light
                 elev_set_floor_indicator(currentFloor);
-                printf("CHECKING FOR PICKUPS!\n");
+
+                // Checks if there are any orders in the floor its moving past
                 if (check_if_pickups(currentDir, currentFloor)) {
-                    printf("Found pickup\n");
                     elev_set_motor_direction(DIRN_STOP);
                     finish_order(currentFloor, currentDir);
                     doors();
                 }
             }
 
+            // Check if it should continue the same direction it was moving
+            // or which way to continue if it had to pick up someone. 
             if (currentDir == 1) {
                 elev_set_motor_direction(DIRN_UP);
                 if (elev_get_floor_sensor_signal() == -1);
@@ -75,31 +82,22 @@ int main() {
                     currentDir = 0;
             }            
             
-            printf("currentOrder: %d \t currenDir: %d \t currentFloor: %d \n", currentOrder, currentDir, currentFloor);
-            print_matrix();
-            if (currentDir == 0) { //currentOrder == currentFloor) {
+            // Here we're at the last stop.
+            if (currentDir == 0) { 
                 elev_set_motor_direction(DIRN_STOP);
                 finish_order(currentFloor, currentDir);
                 doors();
             }
         }
 
+        // When ordered in the same floor it's in.
         if ((currentFloor == currentOrder) && (elev_get_floor_sensor_signal() != -1)) {
             for (int i = 0; i < 3; ++i) {
                 rset_order(currentFloor, i);
             }
             turn_off_lights(currentFloor);
-            printf("LST FNC!!!!!\n");
-            printf("currentOrder: %d \t currenDir: %d \t currentFloor: %d \n", currentOrder, currentDir, currentFloor);
-            print_matrix();
+            doors();
         }
     }
     return 0;
-}
-
-void print_matrix()
-{
-    for (int i = 0; i < 4; ++i) {
-        printf("{%d} {%d} {%d}\n", order_matrix[3 - i][0], order_matrix[3 - i][1], order_matrix[3 - i][2] );
-    }
 }

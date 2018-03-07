@@ -10,7 +10,6 @@ void initialize()
     else
         elev_set_motor_direction(DIRN_STOP); 
     while (1) {
-        // Change direction when we reach top/bottom floor
         if (elev_get_floor_sensor_signal() !=  -1) {
             elev_set_motor_direction(DIRN_STOP);
             elev_set_floor_indicator(elev_get_floor_sensor_signal());
@@ -19,7 +18,7 @@ void initialize()
     }
 }
 
-void stop(int currentFloor, int currentOrder, int currentDir) 
+void emergency_stop(int currentFloor, int currentOrder, int currentDir) 
 {
     elev_set_motor_direction(DIRN_STOP);
     if (elev_get_floor_sensor_signal() != -1)
@@ -34,9 +33,10 @@ void stop(int currentFloor, int currentOrder, int currentDir)
     }
 
     while (1) {
-        printf("STOPPED!!!!!\n");
-        check_buttons_for_input();
-        if (check_if_any_orders()) break;
+        if (!elev_get_stop_signal())
+            check_buttons_for_input();
+        if (check_if_any_orders()) 
+            break;
     }
 
     elev_set_stop_lamp(0);

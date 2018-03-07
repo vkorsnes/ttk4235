@@ -29,25 +29,24 @@ int get_order(int currentFloor)
 
 int check_if_pickups(int currentDir, int currentFloor)
 {
+    // When moving up, ignore orders down
     if (currentDir == 1) {
         for (int i = 0; i < 2; ++i) {
             if (order_matrix[currentFloor][i]) {
-                printf("Debug\n");  
                 return 1;
             }
 
         }
     }
+    // When moving down, ignore orders up
     else if (currentDir == -1) {
         for (int i = 1; i < 3; ++i) {
             if (order_matrix[currentFloor][i]) {
-                printf("Debug\n");  
                 return 1;
             }
         }
     }
     else {
-      printf("Debug\n");  
       return 0;
     } 
 }
@@ -56,46 +55,49 @@ void finish_order(int currentFloor, int currentDir)
 {
     if (currentFloor == -1) return;
 
-    order_matrix[currentFloor][1] = 0;
-    elev_set_button_lamp(button_type[1], currentFloor, 0);
+    rset_order(currentFloor, 1);
     
     // When in first or fourth floor, all orders must have been serviced
-    if (currentFloor == 0) {
-        order_matrix[currentFloor][0] = 0;
-        elev_set_button_lamp(button_type[0], currentFloor, 0);
-    }
-    else if (currentFloor == 3) {
-        order_matrix[currentFloor][2] = 0;
-        elev_set_button_lamp(button_type[2], currentFloor, 0);   
-    }
+    if (currentFloor == 0) 
+        rset_order(currentFloor, 0);
+
+    else if (currentFloor == 3)
+        rset_order(currentFloor, 2);
     
     // Only remove order in the direction the elevator is moving
-    else if (currentDir == 1) {
-        order_matrix[currentFloor][0] = 0;
-        elev_set_button_lamp(button_type[0], currentFloor, 0);
-    }
-    else if (currentDir == -1) {
-        order_matrix[currentFloor][2] = 0;
-        elev_set_button_lamp(button_type[2], currentFloor, 0);
-    }
+    else if (currentDir == 1) 
+        rset_order(currentFloor, 0);
+
+    else if (currentDir == -1) 
+        rset_order(currentFloor, 2);
     
     // In this case the elevator has landed on this floor, and thus all orders are removed
     else {
-        order_matrix[currentFloor][0] = 0;
-        order_matrix[currentFloor][2] = 0;
-        elev_set_button_lamp(button_type[0], currentFloor, 0);
-        elev_set_button_lamp(button_type[2], currentFloor, 0);
+        rset_order(currentFloor, 0);
+        rset_order(currentFloor, 2);
     }
 }
 
+
 void set_order(int m, int n)  
 { 
-    order_matrix[m][n] = 1; 
+    order_matrix[m][n] = 1;
+
+    // Setting a light that doesnt exist should never happen, but redundancy is good.
+    if(!(m == 3 && n == 0) || !(m == 0 && n == 2))
+        elev_set_button_lamp(button_type[n], m 1);
 }
+
 void rset_order(int m, int n) 
 { 
-    order_matrix[m][n] = 0; 
+    order_matrix[m][n] = 0;
+
+    // Resetting a light that doesnt exist happens a lot, so must check.
+    if(!(m == 3 && n == 0) || !(m == 0 && n == 2))
+        elev_set_button_lamp(button_type[n], m = 0);
+
 }
+
 
 int check_if_order_above(int currentFloor)
 {

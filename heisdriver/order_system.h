@@ -3,19 +3,20 @@
 
 #include "elev.h"
 
+// Make these arrays available in other files.
 extern int order_matrix[4][3];
 extern elev_button_type_t button_type[3];
 
 // If any orders, returns true (1)
 int check_if_any_orders();
 
-// Returns order
+// Returns floor number for order
 int get_order(int currentFloor);
 
 // When moving, checks if it should stop and pick up passanger.
 int check_if_pickups(int currentDir, int currentFloor);
 
-// 
+// Resets orders which are serviced
 void finish_order(int currentFloor, int currentDir);
 
 void set_order(int m, int n);
