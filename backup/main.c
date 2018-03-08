@@ -221,7 +221,10 @@ void ov_delay(int s)
 void ov_doors()
 {
     elev_set_door_open_lamp(1);
-    ov_delay(2);
+    clock_t start = clock()/CLOCKS_PER_SEC;
+    while ((int)start+3 > (int)(clock()/CLOCKS_PER_SEC))
+        check_buttons_for_input();
+    //ov_delay(2);
     elev_set_door_open_lamp(0);
 }
 
