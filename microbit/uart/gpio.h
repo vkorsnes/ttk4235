@@ -18,3 +18,4 @@ typedef struct {
 } NRF_GPIO_REG;
 
 #endif
+

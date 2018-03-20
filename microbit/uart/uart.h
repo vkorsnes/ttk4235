@@ -2,7 +2,7 @@
 #define UART_H
 
 void uart_init();
-void uart_init(char letter);
+void uart_send(char letter);
 char uart_read();
 
 #endif //!UART_H
