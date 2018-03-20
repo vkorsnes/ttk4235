@@ -103,7 +103,9 @@ int main() {
             ov_floor_buttons();
             
             if (elev_get_floor_sensor_signal() != -1) {
-                currentFloor = elev_get_floor_sensor_signal();
+                int tmp_floor = elev_get_floor_sensor_signal();
+                if (tmp_floor != -1)
+                    currentFloor = elev_get_floor_sensor_signal();
                 elev_set_floor_indicator(currentFloor);
                 printf("CHECKING FOR PICKUPS!\n");
                 if (ov_check_if_pickups(currentDir, currentFloor)) {
@@ -137,14 +139,16 @@ int main() {
             }
         }
 
-        if ((currentFloor == currentOrder) && (elev_get_floor_sensor_signal() != -1)){ //&& !ov_check_if_any_orders()) {
+        if ((currentFloor == currentOrder) && (elev_get_floor_sensor_signal() != -1) && ov_check_if_any_orders()) {
             for (int i = 0; i < 3; ++i) {
                 order_matrix[currentFloor][i] = 0;
             }
+
             ov_turn_off_lights(currentFloor);
             printf("LST FNC!!!!!\n");
             printf("currentOrder: %d \t currenDir: %d \t currentFloor: %d \n", currentOrder, currentDir, currentFloor);
             ov_print_matrix();
+            ov_doors();
         }
     }
     return 0;
@@ -222,8 +226,8 @@ void ov_doors()
 {
     elev_set_door_open_lamp(1);
     clock_t start = clock()/CLOCKS_PER_SEC;
-    while ((int)start+3 > (int)(clock()/CLOCKS_PER_SEC))
-        check_buttons_for_input();
+    while (start+1.8 > (clock()/CLOCKS_PER_SEC))
+        ov_floor_buttons();
     //ov_delay(2);
     elev_set_door_open_lamp(0);
 }
