@@ -1,6 +1,5 @@
 #include "uart.h"
 #include "gpio.h"
-#include <stdio.h>
 
 #define UART ((NRF_UART_REG*)0x40002000)
 
@@ -87,14 +86,13 @@ void uart_send(char data)
 	UART->STARTTX = 1;
 	UART->TXD = data;
 	while (!(UART->TXDRDY));
+	UART->TXDRDY = 0;
+
 }
 
 char uart_read()
 {
 	char data = 0;
-	printf("Enter char to be sent: ");
-	data = getchar();
-
 	if (!(UART->RXDRDY))
 		data = '\0';
 	else {

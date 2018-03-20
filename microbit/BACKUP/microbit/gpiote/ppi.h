@@ -28,6 +28,4 @@ typedef struct {
 	volatile uint32_t CHG[4];
 } NRF_PPI_REG;
 
-void ppi_init();
-
 #endif
